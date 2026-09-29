@@ -1,28 +1,29 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
-// MongoDB Client Setup
 const client = new MongoClient(process.env.DB_URL);
 
 let db;
+let isConnected = false;
 
-// ১. ডাটাবেস কানেক্ট করার ফাংশন
+// Connect — reuses existing connection (important for Vercel serverless)
 const connect = async () => {
+  if (isConnected && db) return db;
   try {
     await client.connect();
     db = client.db(process.env.DB_NAME);
-    console.log("You successfully connected to MongoDB!");
+    isConnected = true;
+    console.log('Connected to MongoDB');
+    return db;
   } catch (error) {
-    console.error("MongoDB Connection Error:", error);
-    process.exit(1);
+    console.error('MongoDB Connection Error:', error);
+    throw error;
   }
 };
 
-// ২. কালেকশন পাওয়ার ফাংশন
-const dbCollection = (collectionName) => {
-  if (!db) {
-    throw new Error("Database not initialized. Call connect() first!");
-  }
+// Get a collection — auto-connects if not yet connected
+const dbCollection = async (collectionName) => {
+  if (!db || !isConnected) await connect();
   return db.collection(collectionName);
 };
 

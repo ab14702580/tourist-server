@@ -29,7 +29,7 @@ const formatUser = (u) => ({
 /** GET /api/admin/users — list all users */
 router.get('/users', async (req, res) => {
   try {
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     const docs = await users.find({}, { projection: { password: 0 } })
       .sort({ createdAt: -1 }).toArray();
     return res.json(docs.map(formatUser));
@@ -49,7 +49,7 @@ router.patch('/users/:id/ban', async (req, res) => {
       return res.status(400).json({ error: 'You cannot ban yourself' });
     }
 
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     await users.updateOne({ _id: new ObjectId(id) }, { $set: { isBanned: true } });
     return res.json({ success: true, message: 'User banned' });
   } catch (err) {
@@ -62,7 +62,7 @@ router.patch('/users/:id/unban', async (req, res) => {
   try {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) return res.status(400).json({ error: 'Invalid ID' });
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     await users.updateOne({ _id: new ObjectId(id) }, { $set: { isBanned: false } });
     return res.json({ success: true, message: 'User unbanned' });
   } catch (err) {
@@ -76,7 +76,7 @@ router.delete('/users/:id', async (req, res) => {
     const { id } = req.params;
     if (!ObjectId.isValid(id)) return res.status(400).json({ error: 'Invalid ID' });
     if (id === req.user.userId) return res.status(400).json({ error: 'Cannot delete yourself' });
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     await users.deleteOne({ _id: new ObjectId(id) });
     return res.json({ success: true });
   } catch (err) {
@@ -89,10 +89,10 @@ router.delete('/users/:id', async (req, res) => {
 /** GET /api/admin/analytics — dashboard stats */
 router.get('/analytics', async (req, res) => {
   try {
-    const bookings   = dbCollection('bookings');
-    const users      = dbCollection('users');
-    const packages   = dbCollection('packages');
-    const destinations = dbCollection('destinations');
+    const bookings   = await dbCollection('bookings');
+    const users      = await dbCollection('users');
+    const packages   = await dbCollection('packages');
+    const destinations = await dbCollection('destinations');
 
     const [
       totalBookings,
@@ -153,7 +153,7 @@ router.get('/analytics', async (req, res) => {
 /** GET /api/admin/bookings — all bookings */
 router.get('/bookings', async (req, res) => {
   try {
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
     const docs = await bookings.find({}).sort({ createdAt: -1 }).toArray();
     return res.json(docs.map(b => ({
       id:           b._id.toString(),
@@ -185,7 +185,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
     }
     if (!ObjectId.isValid(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
     await bookings.updateOne(
       { _id: new ObjectId(id) },
       { $set: { status, updatedAt: new Date() } }
@@ -201,7 +201,7 @@ router.patch('/bookings/:id/status', async (req, res) => {
 /** POST /api/admin/packages — add new package */
 router.post('/packages', async (req, res) => {
   try {
-    const packages = dbCollection('packages');
+    const packages = await dbCollection('packages');
     const count = await packages.countDocuments();
     const pkg = {
       ...req.body,
@@ -219,7 +219,7 @@ router.post('/packages', async (req, res) => {
 router.delete('/packages/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const packages = dbCollection('packages');
+    const packages = await dbCollection('packages');
     let result;
     if (ObjectId.isValid(id)) {
       result = await packages.deleteOne({ _id: new ObjectId(id) });
@@ -236,7 +236,7 @@ router.delete('/packages/:id', async (req, res) => {
 /** POST /api/admin/destinations — add new destination */
 router.post('/destinations', async (req, res) => {
   try {
-    const destinations = dbCollection('destinations');
+    const destinations = await dbCollection('destinations');
     const count = await destinations.countDocuments();
     const destination = {
       ...req.body,
@@ -254,7 +254,7 @@ router.post('/destinations', async (req, res) => {
 router.delete('/destinations/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const destinations = dbCollection('destinations');
+    const destinations = await dbCollection('destinations');
     let result;
     if (ObjectId.isValid(id)) {
       result = await destinations.deleteOne({ _id: new ObjectId(id) });

@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Name, email, and password are required' });
     }
 
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     const existing = await users.findOne({ email });
 
     if (existing) {
@@ -102,7 +102,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     const user = await users.findOne({ email });
 
     if (!user) {
@@ -160,7 +160,7 @@ router.post('/google', async (req, res) => {
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
 
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
 
     // Check if a user with this email already exists
     let user = await users.findOne({ email });
@@ -236,7 +236,7 @@ router.post('/facebook', async (req, res) => {
       });
     }
 
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     let user = await users.findOne({ email });
 
     if (user) {
@@ -290,7 +290,7 @@ router.post('/facebook', async (req, res) => {
 /** GET /api/auth/me  (protected) */
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
     const user = await users.findOne({ _id: new ObjectId(req.user.userId) });
     if (!user) return res.status(404).json({ error: 'User not found' });
     return res.json({ user: formatUser(user) });
@@ -304,7 +304,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 router.patch('/profile', authMiddleware, async (req, res) => {
   try {
     const { name, phone, avatar } = req.body;
-    const users = dbCollection('users');
+    const users = await dbCollection('users');
 
     const existing = await users.findOne({ _id: new ObjectId(req.user.userId) });
     if (!existing) return res.status(404).json({ error: 'User not found' });

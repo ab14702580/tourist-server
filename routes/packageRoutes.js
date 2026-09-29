@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const packages = dbCollection('packages');
+    const packages = await dbCollection('packages');
     const docs = await packages.find(query).toArray();
     return res.json(docs.map(formatDoc));
   } catch (err) {
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const packages = dbCollection('packages');
+    const packages = await dbCollection('packages');
     let doc = null;
 
     // Try ObjectId first

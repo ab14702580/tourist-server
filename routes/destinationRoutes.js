@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const destinations = dbCollection('destinations');
+    const destinations = await dbCollection('destinations');
     const docs = await destinations.find(query).toArray();
     return res.json(docs.map(formatDoc));
   } catch (err) {
@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 // GET /api/destinations/featured — items where badge field exists
 router.get('/featured', async (req, res) => {
   try {
-    const destinations = dbCollection('destinations');
+    const destinations = await dbCollection('destinations');
     const docs = await destinations.find({ badge: { $exists: true } }).toArray();
     return res.json(docs.map(formatDoc));
   } catch (err) {
@@ -51,7 +51,7 @@ router.get('/featured', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const destinations = dbCollection('destinations');
+    const destinations = await dbCollection('destinations');
     let doc = null;
 
     // Try ObjectId first

@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Name, email, and message are required' });
     }
 
-    const contacts = dbCollection('contacts');
+    const contacts = await dbCollection('contacts');
     await contacts.insertOne({
       name,
       email,
@@ -37,7 +37,7 @@ router.post('/subscribe', async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    const newsletter = dbCollection('newsletter');
+    const newsletter = await dbCollection('newsletter');
 
     // Prevent duplicate subscriptions
     const existing = await newsletter.findOne({ email });

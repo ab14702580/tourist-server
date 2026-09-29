@@ -18,7 +18,7 @@ const generateBookingRef = () => `WB${Date.now()}`;
 router.post('/', async (req, res) => {
   try {
     const bookingData = req.body;
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
 
     const booking = {
       ...bookingData,
@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
 // GET /api/bookings/my-bookings — all bookings for the current user
 router.get('/my-bookings', async (req, res) => {
   try {
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
     const docs = await bookings
       .find({ userId: req.user.userId })
       .sort({ createdAt: -1 })
@@ -61,7 +61,7 @@ router.get('/my-bookings', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'Invalid booking ID' });
@@ -90,7 +90,7 @@ router.patch('/:id/status', async (req, res) => {
       return res.status(400).json({ error: 'Invalid booking ID' });
     }
 
-    const bookings = dbCollection('bookings');
+    const bookings = await dbCollection('bookings');
     await bookings.updateOne(
       { _id: new ObjectId(id) },
       { $set: { status, updatedAt: new Date() } }
